@@ -176,5 +176,7 @@ export class GrapherDrawer {
     '#6C71C4',
     '#7C6F64',
     '#cc8426',
-  ]
+  ];
+
+  static letters = ['f', 'g', 'h', 'k', 'j', 'i', ]
 }
