@@ -6,13 +6,13 @@ import { GrapherDrawer } from "../helpers/grapher";
 // Props
 export let width: number;
 export let height: number;
-export let equation: (x: number) => number; 
+export let equations: Array<(x: number) => number>; 
 
 const id = (Math.random() + 1).toString(36).substring(7);
 
 onMount(() => {
   const graphDrawer = new GrapherDrawer(id, width, height);
-  graphDrawer.drawFn(equation, { yMin: 3, lineColor: '#ffaaaa' });
+  equations.forEach((eq, idx) => graphDrawer.drawFn(eq, GrapherDrawer.pastelColors[idx] ));
 })
 </script>
 

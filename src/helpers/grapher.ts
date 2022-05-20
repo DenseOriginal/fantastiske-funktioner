@@ -12,29 +12,36 @@ const defaultOptions: Options = {
   doEqualizeAxes: true,
   doDrawAxes: true,
   lineColor: '#666',
-  xMax: 5,
-  xMin: -5,
-  yMin: -5,
-  yMax: 5,
+  xMax: 10,
+  xMin: -10,
+  yMin: -10,
+  yMax: 10,
 }
 
 export class GrapherDrawer {
   private svg;
   private svgNS;
 
-  private lightStyle = {stroke: '#ddd', fill: 'transparent', 'stroke-width': 3}
+  private lightStyle = {stroke: '#ddd', fill: 'transparent', 'stroke-width': 1.5}
 
-  private numFnPts = 300
+  private numFnPts = 300;
+
+  opts: Options;
 
   constructor(
     svgId: string,
     private xSize: number,
     private ySize: number,
+    _opts: Partial<Options> = {}
   ) {
+    this.opts = { ...defaultOptions, ..._opts };
+
     this.svg = document.getElementById(svgId);
     this.svgNS = this.svg.namespaceURI;
 
     this.setCanvasSize(xSize, ySize);
+
+    if (this.opts.doDrawAxes) this.drawAxis();
   }
 
   public setCanvasSize(w: number, h: number) {
@@ -57,15 +64,55 @@ export class GrapherDrawer {
     return elt
   }
 
-  drawFn(fn: (x: number) => number, _opts: Partial<Options> = {}) {
-    const opts = { ...defaultOptions, ..._opts };
-    
-    let xMax = opts.xMax;
-    let xMin = opts.xMin;
-    let yMin = opts.yMin;
-    let yMax = opts.yMax;
+  private drawAxis() {
+    let { xMax, xMin, yMin, yMax } = this.opts;
 
-    if (opts.doEqualizeAxes) {
+    const canvasPtFromXY = (x, y) => {
+      const xPerc = (x - xMin) / (xMax - xMin)
+      const yPerc = (y - yMin) / (yMax - yMin)
+      return [xPerc * this.xSize, this.ySize - yPerc * this.ySize]
+    }
+
+    const drawTickAroundPt = (p, dir) => {
+      const tick = this.add('line', this.lightStyle)
+      const a = [p[0], p[1]]
+      a[dir] -= 3
+      const b = [p[0], p[1]]
+      b[dir] += 3
+      this.addAttributes(tick, {x1: a[0], y1: a[1], x2: b[0], y2: b[1]})
+    }
+
+    // The x-axis.
+    const leftPt  = canvasPtFromXY(xMin, 0)
+    const rightPt = canvasPtFromXY(xMax, 0)
+    if (0 <= leftPt[1] && leftPt[1] < this.ySize) {
+      const xAxis = this.add('line', this.lightStyle)
+      this.addAttributes(xAxis, {x1:  leftPt[0], y1:  leftPt[1],
+                            x2: rightPt[0], y2: rightPt[1]})
+      for (let x = Math.ceil(xMin); x <= Math.floor(xMax); x++) {
+        const p = canvasPtFromXY(x, 0)
+        drawTickAroundPt(p, 1)  // 1 == vertical tick
+      }
+    }
+
+    // The y-axis.
+    const botPt = canvasPtFromXY(0, yMin)
+    const topPt = canvasPtFromXY(0, yMax)
+    if (0 <= botPt[0] && botPt[0] < this.xSize) {
+      const yAxis = this.add('line', this.lightStyle)
+      this.addAttributes(yAxis, {x1: botPt[0], y1: botPt[1],
+                            x2: topPt[0], y2: topPt[1]})
+      for (let y = Math.ceil(yMin); y <= Math.floor(yMax); y++) {
+        const p = canvasPtFromXY(0, y)
+        drawTickAroundPt(p, 0)  // 0 == horizontal tick
+      }
+    }
+  }
+
+  drawFn(fn: (x: number) => number, lineColor) {
+    let { xMax, xMin, yMin, yMax } = this.opts;
+
+    if (this.opts.doEqualizeAxes) {
       // This means to *increase* the frame just enough so that the axes are
       // equally scaled.
       const xRatio = (xMax - xMin) / this.xSize
@@ -87,44 +134,6 @@ export class GrapherDrawer {
       const xPerc = (x - xMin) / (xMax - xMin)
       const yPerc = (y - yMin) / (yMax - yMin)
       return [xPerc * this.xSize, this.ySize - yPerc * this.ySize]
-    }
-
-    const drawTickAroundPt = (p, dir) => {
-      const tick = this.add('line', this.lightStyle)
-      const a = [p[0], p[1]]
-      a[dir] -= 5
-      const b = [p[0], p[1]]
-      b[dir] += 5
-      this.addAttributes(tick, {x1: a[0], y1: a[1], x2: b[0], y2: b[1]})
-    }
-
-    if (opts.doDrawAxes) {
-
-      // The x-axis.
-      const leftPt  = canvasPtFromXY(xMin, 0)
-      const rightPt = canvasPtFromXY(xMax, 0)
-      if (0 <= leftPt[1] && leftPt[1] < this.ySize) {
-        const xAxis = this.add('line', this.lightStyle)
-        this.addAttributes(xAxis, {x1:  leftPt[0], y1:  leftPt[1],
-                              x2: rightPt[0], y2: rightPt[1]})
-        for (let x = Math.ceil(xMin); x <= Math.floor(xMax); x++) {
-          const p = canvasPtFromXY(x, 0)
-          drawTickAroundPt(p, 1)  // 1 == vertical tick
-        }
-      }
-
-      // The y-axis.
-      const botPt = canvasPtFromXY(0, yMin)
-      const topPt = canvasPtFromXY(0, yMax)
-      if (0 <= botPt[0] && botPt[0] < this.xSize) {
-        const yAxis = this.add('line', this.lightStyle)
-        this.addAttributes(yAxis, {x1: botPt[0], y1: botPt[1],
-                              x2: topPt[0], y2: topPt[1]})
-        for (let y = Math.ceil(yMin); y <= Math.floor(yMax); y++) {
-          const p = canvasPtFromXY(0, y)
-          drawTickAroundPt(p, 0)  // 0 == horizontal tick
-        }
-      }
     }
 
     const xDelta = (xMax - xMin) / (this.numFnPts - 1)
@@ -152,7 +161,20 @@ export class GrapherDrawer {
       } while (x < xTarget);
     }
 
-    const polyline = this.add('polyline', { stroke: opts.lineColor, fill: 'transparent', 'stroke-width': 3 })
+    const polyline = this.add('polyline', { stroke: lineColor, fill: 'transparent', 'stroke-width': 2 })
     this.addAttributes(polyline, {points: pts.join(' ')})
   }
+
+  // Pastel colors
+  static pastelColors = [
+    '#E06B74',
+    '#62AEEF',
+    '#98C379',
+    '#E5C07A',
+    '#C678DD',
+    '#55B6C2',
+    '#6C71C4',
+    '#7C6F64',
+    '#cc8426',
+  ]
 }
