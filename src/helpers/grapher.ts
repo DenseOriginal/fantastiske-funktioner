@@ -109,7 +109,7 @@ export class GrapherDrawer {
     }
   }
 
-  drawFn(fn: (x: number) => number, lineColor) {
+  drawFn(fn: (x: number) => number, lineColor, id: number) {
     let { xMax, xMin, yMin, yMax } = this.opts;
 
     if (this.opts.doEqualizeAxes) {
@@ -162,7 +162,7 @@ export class GrapherDrawer {
     }
 
     const polyline = this.add('polyline', { stroke: lineColor, fill: 'transparent', 'stroke-width': 2 })
-    this.addAttributes(polyline, {points: pts.join(' ')})
+    this.addAttributes(polyline, {points: pts.join(' '), id})
   }
 
   // Pastel colors
