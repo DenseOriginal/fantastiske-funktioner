@@ -35,12 +35,14 @@ let hoveredEquation = -1;
       {/each}
     </ul>
 
-    <Grapher
-      width={400}
-      height={400}
-      equations={examples.map(cur => cur.equation)}
-      highlight={hoveredEquation}
-    ></Grapher>
+    <div class="graph">
+      <Grapher
+        width={500}
+        height={400}
+        equations={examples.map(cur => cur.equation)}
+        highlight={hoveredEquation}
+      ></Grapher>
+    </div>
   </div>
 </section>
 
@@ -52,6 +54,19 @@ let hoveredEquation = -1;
 
 .examples > ul > li {
   display: flex;
+}
+
+.examples > .graph {
+  overflow-x: auto;
+  max-width: 500px;
+  width: 100%;
+}
+
+@media only screen and (max-width: 800px) {
+  .examples {
+    flex-direction: column;
+    align-items: center;
+  }
 }
 
 .abstract > * {
