@@ -9,7 +9,7 @@ export let height: number;
 export let equations: Array<(x: number) => number>; 
 export let highlight: number;
 
-const id = (Math.random() + 1).toString(36).substring(7);
+const id = (Math.random() + 1).toString(36).substring(7).replace(/[0-9]/g, '');
 
 let graphDrawer: GrapherDrawer | undefined;
 

@@ -10,14 +10,18 @@ export let examples: Array<{
   equation: (x: number) => number;
   katex: string;
 }>
+export let abstract: string;
 
 let hoveredEquation = -1;
-
-$: console.log(hoveredEquation);
 </script>
 
 <section>
   <h2>{name}</h2>
+  <div class="abstract">
+    <p>Den generelle forskrift:</p>
+    <Katex math={abstract}></Katex>
+  </div>
+
   <slot name="content" />
 
   <p>Her er nogle eksempler</p>
@@ -48,5 +52,13 @@ $: console.log(hoveredEquation);
 
 .examples > ul > li {
   display: flex;
+}
+
+.abstract > * {
+  margin: 2px auto;
+}
+
+section {
+  margin-bottom: 3rem;
 }
 </style>

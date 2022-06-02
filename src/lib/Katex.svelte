@@ -1,6 +1,6 @@
-<script>
+<script lang="ts">
 	import katex from "katex";
-	export let math;
+	export let math: string;
 	export let displayMode = false;
 	
 	const options = {
@@ -8,7 +8,7 @@
 		throwOnError: false
 	}
 	
-	$: katexString = katex.renderToString(math, options);
+	$: katexString = katex.renderToString(math.replaceAll('*', '\\cdot '), options);
 </script>
 
 <svelte:head>

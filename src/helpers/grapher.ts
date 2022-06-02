@@ -146,6 +146,8 @@ export class GrapherDrawer {
       do {
         x = xTarget
         const y = fn(x)
+        if(isNaN(y)) continue;
+        
         const canvasPt = canvasPtFromXY(x, y)
         let perc = 0.5
         while (prevCanvasY && Math.abs(prevCanvasY - canvasPt[1]) > 30 &&
